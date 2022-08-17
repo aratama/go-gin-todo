@@ -1,0 +1,12 @@
+<html>
+	<h1>Todo</h1>
+	<table>
+		<tbody>
+			{{range .tasks}}
+				<tr id="{{.Id}}">
+					<td>{{.Name}}</td>
+				</tr>
+			{{end}}
+		</tbody>
+	</table>
+</html>
