@@ -5,8 +5,20 @@
 			{{range .tasks}}
 				<tr id="{{.Id}}">
 					<td>{{.Name}}</td>
+					<td>{{.CreatedAt}}</td>
+					<td>
+						<form action="/delete" method="POST">
+							<input type="hidden" name="id" value="{{.Id}}"></input>
+							<button type="submit">削除</button>
+						</form>
+					</td>
 				</tr>
 			{{end}}
 		</tbody>
 	</table>
+
+	<form action="/add" method="POST">
+		<input name="name"></input>
+		<button type="submit">タスクを追加</button>
+	</form>
 </html>

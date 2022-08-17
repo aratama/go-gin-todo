@@ -9,9 +9,14 @@ import (
 
 const dbFileName = "./todo.db"
 
-func Initialize(db *sql.DB) {
+func InitializeTables(db *sql.DB) {
 	sqlStmt := `
-	create table if not exists todo (id integer not null primary key AUTOINCREMENT, name text);
+	create table if not exists todo (
+		id integer not null primary key AUTOINCREMENT, 
+		name text,
+		created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime')),
+    	updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime'))
+	);
 	`
 	_, err := db.Exec(sqlStmt)
 	if err != nil {
@@ -20,98 +25,26 @@ func Initialize(db *sql.DB) {
 	}
 }
 
-func DbInit(db *sql.DB) {
-
-	Initialize(db)
-
-	tx, err := db.Begin()
-	if err != nil {
-		log.Fatal(err)
-	}
-	stmt, err := tx.Prepare("insert into todo(name) values(?)")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec("買い物")
+func AddTask(db *sql.DB, name string) {
+	_, err := db.Exec("insert into todo(name) values(?)", name)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// rows, err := db.Query("select id, name from foo")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer rows.Close()
-	// for rows.Next() {
-	// 	var id int
-	// 	var name string
-	// 	err = rows.Scan(&id, &name)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	fmt.Println(id, name)
-	// }
-	// err = rows.Err()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// stmt, err = db.Prepare("select name from foo where id = ?")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer stmt.Close()
-	// var name string
-	// err = stmt.QueryRow("3").Scan(&name)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println(name)
-
-	// _, err = db.Exec("delete from foo")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// _, err = db.Exec("insert into foo(id, name) values(1, 'foo'), (2, 'bar'), (3, 'baz')")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// rows, err = db.Query("select id, name from foo")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer rows.Close()
-	// for rows.Next() {
-	// 	var id int
-	// 	var name string
-	// 	err = rows.Scan(&id, &name)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	fmt.Println(id, name)
-	// }
-	// err = rows.Err()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	log.Printf("Task %s added\n", name)
 }
 
-type Task struct {
-	Id   int
-	Name string
+func RemoveTask(db *sql.DB, id int) {
+	_, err := db.Exec("delete from todo where id = ?", id)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Task %d deleted\n", id)
 }
 
 func GetTodoList(db *sql.DB) []Task {
-	rows, err := db.Query("select id, name from todo")
+	rows, err := db.Query("select id, name, created_at from todo")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -121,11 +54,12 @@ func GetTodoList(db *sql.DB) []Task {
 	for rows.Next() {
 		var id int
 		var name string
-		err = rows.Scan(&id, &name)
+		var created_at string
+		err = rows.Scan(&id, &name, &created_at)
 		if err != nil {
 			log.Fatal(err)
 		}
-		taskList = append(taskList, Task{id, name})
+		taskList = append(taskList, Task{id, name, created_at})
 	}
 	err = rows.Err()
 	if err != nil {
