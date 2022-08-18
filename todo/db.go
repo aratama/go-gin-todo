@@ -7,7 +7,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const dbFileName = "./todo.db"
+const dbFileName = "./todo.sqlite"
 
 func InitializeTables(db *sql.DB) {
 	sqlStmt := `

@@ -13,7 +13,7 @@ import (
 
 func RenderTaskList(db *sql.DB, c *gin.Context) {
 	tasks := GetTodoList(db)
-	c.HTML(http.StatusOK, "index.tmpl", gin.H{
+	c.HTML(http.StatusOK, "index.go.tmpl", gin.H{
 		"tasks": tasks,
 	})
 }
