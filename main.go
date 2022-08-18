@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	todo.TodoMain()
+	todo.Main()
 }
