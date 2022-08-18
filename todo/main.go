@@ -29,6 +29,7 @@ func TodoMain() {
 
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
+	router.Static("/assets", "./assets")
 	router.GET("/", func(c *gin.Context) {
 		RenderTaskList(db, c)
 	})

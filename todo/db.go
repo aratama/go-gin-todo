@@ -42,7 +42,7 @@ func RemoveTask(db *sql.DB, id int) {
 }
 
 func GetTodoList(db *sql.DB) []Task {
-	rows, err := db.Query("select id, name, created_at from todo")
+	rows, err := db.Query("select id, name, created_at from todo order by created_at")
 	if err != nil {
 		log.Fatal(err)
 	}

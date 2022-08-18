@@ -1,24 +1,42 @@
 <html>
-	<h1>Todo</h1>
-	<table>
-		<tbody>
-			{{range .tasks}}
-				<tr id="{{.Id}}">
-					<td>{{.Name}}</td>
-					<td>{{.CreatedAt}}</td>
-					<td>
-						<form action="/delete" method="POST">
-							<input type="hidden" name="id" value="{{.Id}}"></input>
-							<button type="submit">削除</button>
-						</form>
-					</td>
-				</tr>
-			{{end}}
-		</tbody>
-	</table>
+	<head>
+		<title>Todo List</title>
+		<link rel="stylesheet" type="text/css" href="/assets/index.css"></link>
+	</head>
+	<body>
+		<main>
+			<h1>Todo List</h1>
 
-	<form action="/add" method="POST">
-		<input name="name"></input>
-		<button type="submit">タスクを追加</button>
-	</form>
+			<form action="/add" method="POST">
+				<input name="name" autofocus placeholder="Task Name"></input>
+				<button type="submit">Add Task</button>
+			</form>
+
+			<table>
+				<thead>
+					<tr>
+						<td>Task</td>
+						<td>CreatedAt</td>
+						<td></td>										
+					</tr>
+				<thead>
+				<tbody>
+					{{range .tasks}}
+						<tr id="{{.Id}}">
+							<td>{{.Name}}</td>
+							<td>{{.CreatedAt}}</td>
+							<td>
+								<form action="/delete" method="POST">
+									<input type="hidden" name="id" value="{{.Id}}"></input>
+									<button type="submit">Delete</button>
+								</form>
+							</td>
+						</tr>
+					{{end}}
+				</tbody>
+			</table>
+
+
+		</main>
+	</body>
 </html>
