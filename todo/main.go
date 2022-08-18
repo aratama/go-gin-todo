@@ -19,6 +19,7 @@ func RenderTaskList(db *sql.DB, c *gin.Context) {
 
 func TodoMain() {
 
+	// initialize Sqlite
 	db, err := sql.Open("sqlite", dbFileName)
 	if err != nil {
 		log.Fatal(err)
@@ -26,6 +27,10 @@ func TodoMain() {
 	defer db.Close()
 
 	InitializeTables(db)
+
+	// initilize Gin
+
+	// gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
