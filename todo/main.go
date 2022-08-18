@@ -11,7 +11,10 @@ import (
 
 	"aratama.github.com/go-gin-todo/ent"
 
-	_ "github.com/mattn/go-sqlite3"
+	"database/sql"
+	"database/sql/driver"
+
+	"modernc.org/sqlite"
 )
 
 type TemplateTask struct {
@@ -37,11 +40,34 @@ func RenderTaskList(client *ent.Client, c *gin.Context) {
 	})
 }
 
+type sqlite3Driver struct {
+	*sqlite.Driver
+}
+
+type sqlite3DriverConn interface {
+	Exec(string, []driver.Value) (driver.Result, error)
+}
+
+func (d sqlite3Driver) Open(name string) (conn driver.Conn, err error) {
+	conn, err = d.Driver.Open(name)
+	if err != nil {
+		return
+	}
+	_, err = conn.(sqlite3DriverConn).Exec("PRAGMA foreign_keys = ON;", nil)
+	if err != nil {
+		_ = conn.Close()
+	}
+	return
+}
+
 func TodoMain() {
+
+	// https://github.com/ent/ent/issues/2460
+	sql.Register("sqlite3", sqlite3Driver{Driver: &sqlite.Driver{}})
 
 	// initialize Sqlite
 	// client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
-	client, err := ent.Open("sqlite3", "todo.sqlite?cache=shared&_fk=1")
+	client, err := ent.Open("sqlite3", "todo.sqlite?_pragma=foreign_keys(1)")
 	if err != nil {
 		log.Fatal(err)
 	}
