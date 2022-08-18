@@ -1,32 +1,56 @@
 package todo
 
 import (
-	"database/sql"
+	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/glebarez/go-sqlite"
+
+	"aratama.github.com/go-gin-todo/ent"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
-func RenderTaskList(db *sql.DB, c *gin.Context) {
-	tasks := GetTodoList(db)
+type TemplateTask struct {
+	Id        int
+	Name      string
+	CreatedAt string
+}
+
+func RenderTaskList(client *ent.Client, c *gin.Context) {
+	tasks := GetTodoList(client)
+	fmt.Printf("%v\n", tasks)
+
+	taskList := []TemplateTask{}
+	for _, t := range tasks {
+		taskList = append(taskList, TemplateTask{
+			Id:        t.ID,
+			Name:      t.Name,
+			CreatedAt: t.CreatedAt.String(),
+		})
+	}
 	c.HTML(http.StatusOK, "index.go.tmpl", gin.H{
-		"tasks": tasks,
+		"tasks": taskList,
 	})
 }
 
 func TodoMain() {
 
 	// initialize Sqlite
-	db, err := sql.Open("sqlite", dbFileName)
+	// client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client, err := ent.Open("sqlite3", "todo.sqlite?cache=shared&_fk=1")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer client.Close()
+	if err := client.Schema.Create(context.Background()); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
 
-	InitializeTables(db)
+	// InitializeTables(db)
 
 	// initilize Gin
 
@@ -36,18 +60,18 @@ func TodoMain() {
 	router.LoadHTMLGlob("templates/*")
 	router.Static("/assets", "./assets")
 	router.GET("/", func(c *gin.Context) {
-		RenderTaskList(db, c)
+		RenderTaskList(client, c)
 	})
 	router.POST("/add", func(c *gin.Context) {
 		c.Request.ParseForm()
 		name := c.Request.PostForm.Get("name")
 		if name != "" {
-			AddTask(db, name)
+			AddTask(client, name)
 		}
-		RenderTaskList(db, c)
+		RenderTaskList(client, c)
 	})
 	router.GET("/delete", func(c *gin.Context) {
-		RenderTaskList(db, c)
+		RenderTaskList(client, c)
 	})
 	router.POST("/delete", func(c *gin.Context) {
 		c.Request.ParseForm()
@@ -57,9 +81,9 @@ func TodoMain() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			RemoveTask(db, id)
+			RemoveTask(client, id)
 		}
-		RenderTaskList(db, c)
+		RenderTaskList(client, c)
 	})
 	log.Printf("Running on http://localhost:8080\n")
 	router.Run("localhost:8080")

@@ -1,2 +1,7 @@
 *.sqlite
 *.exe
+
+/ent/**/*.go
+!/ent/schema/*.go
+
+

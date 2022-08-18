@@ -1,67 +1,44 @@
 package todo
 
 import (
-	"database/sql"
+	"context"
+	"fmt"
+
 	"log"
+
+	"aratama.github.com/go-gin-todo/ent"
 )
 
 const dbFileName = "./todo.sqlite"
 
-func InitializeTables(db *sql.DB) {
-	sqlStmt := `
-	create table if not exists todo (
-		id integer not null primary key AUTOINCREMENT, 
-		name text,
-		created_at TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime')),
-    	updated_at TEXT NOT NULL DEFAULT (DATETIME('now', 'localtime'))
-	);
-	`
-	_, err := db.Exec(sqlStmt)
+func AddTask(client *ent.Client, name string) {
+	ctx := context.Background()
+	_, err := client.TodoTask.Create().SetName(name).Save(ctx)
 	if err != nil {
-		log.Printf("%q: %s\n", err, sqlStmt)
+		log.Printf("%v\n", err)
 		return
 	}
-}
-
-func AddTask(db *sql.DB, name string) {
-	_, err := db.Exec("insert into todo(name) values(?)", name)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	log.Printf("Task %s added\n", name)
 }
 
-func RemoveTask(db *sql.DB, id int) {
-	_, err := db.Exec("delete from todo where id = ?", id)
+func RemoveTask(client *ent.Client, id int) {
+	ctx := context.Background()
+	err := client.TodoTask.DeleteOneID(id).Exec(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("%v\n", err)
+		return
 	}
-
 	log.Printf("Task %d deleted\n", id)
 }
 
-func GetTodoList(db *sql.DB) []Task {
-	rows, err := db.Query("select id, name, created_at from todo order by created_at")
+func GetTodoList(client *ent.Client) []*ent.TodoTask {
+	ctx := context.Background()
+	todoTaskList, err := client.TodoTask.Query().All(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("%v\b", err)
+		var empty []*ent.TodoTask
+		return empty
 	}
-	defer rows.Close()
-
-	var taskList []Task
-	for rows.Next() {
-		var id int
-		var name string
-		var created_at string
-		err = rows.Scan(&id, &name, &created_at)
-		if err != nil {
-			log.Fatal(err)
-		}
-		taskList = append(taskList, Task{id, name, created_at})
-	}
-	err = rows.Err()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return taskList
+	fmt.Printf("%v\n", todoTaskList)
+	return todoTaskList
 }

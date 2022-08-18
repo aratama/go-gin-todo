@@ -12,6 +12,7 @@ Simplest Todo List Example in Go.
 ## Usage
 
 ```
+$ go generate ./ent
 $ go run main.go
 ```
 
