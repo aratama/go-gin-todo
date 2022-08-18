@@ -1,5 +1,7 @@
 # go-gin-todo
 
+![screenshot](./docs/screenshot.png)
+
 Simplest Todo List Example in Go.
 
 - No JavaScript
