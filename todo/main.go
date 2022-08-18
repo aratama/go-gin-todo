@@ -7,8 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/glebarez/go-sqlite"
 )
 
 func RenderTaskList(db *sql.DB, c *gin.Context) {
@@ -20,7 +19,7 @@ func RenderTaskList(db *sql.DB, c *gin.Context) {
 
 func TodoMain() {
 
-	db, err := sql.Open("sqlite3", dbFileName)
+	db, err := sql.Open("sqlite", dbFileName)
 	if err != nil {
 		log.Fatal(err)
 	}
