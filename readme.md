@@ -4,8 +4,10 @@
 
 Simplest Todo List Example in Go.
 
+- Pure Go, no cgo
+- [Gin](https://gin-gonic.com/) as Web Application Framework
+- [go-sqlite](https://github.com/glebarez/go-sqlite) for perpetuation
 - No JavaScript
-- sqlite
 
 ## Usage
 
