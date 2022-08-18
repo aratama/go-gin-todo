@@ -2,28 +2,32 @@ package todo
 
 import (
 	"context"
-	"database/sql"
 	"log"
 
 	"aratama.github.com/go-gin-todo/ent"
-	"modernc.org/sqlite"
+	"github.com/gin-gonic/gin"
 )
 
-func Main() {
+var client *ent.Client
+var router *gin.Engine
 
-	// https://github.com/ent/ent/issues/2460
-	sql.Register("sqlite3", &sqlite.Driver{})
+func InitizeServer(driverName string, dataSourceName string) *gin.Engine {
+	if client == nil || router == nil {
 
-	// create ent client
-	client, err := ent.Open("sqlite3", "todo.sqlite?_pragma=foreign_keys(1)")
-	if err != nil {
-		log.Fatalf("Failed open db connection: %v\n", err)
+		// create ent client
+		client, err := ent.Open(driverName, dataSourceName)
+		if err != nil {
+			log.Fatalf("Failed open db connection: %v\n", err)
+		}
+
+		err = client.Schema.Create(context.Background())
+		if err != nil {
+			log.Fatalf("failed creating schema resources: %v", err)
+		}
+
+		// start Gin
+		router = InitializeGin(client)
 	}
-	defer client.Close()
-	if err := client.Schema.Create(context.Background()); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
-	}
 
-	// start Gin
-	InitializeGin(client)
+	return router
 }

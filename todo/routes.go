@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitializeGin(client *ent.Client) {
+func InitializeGin(client *ent.Client) *gin.Engine {
 
 	// gin.SetMode(gin.ReleaseMode)
 
@@ -52,5 +52,6 @@ func InitializeGin(client *ent.Client) {
 		RenderTaskList(client, c)
 	})
 
-	router.Run("localhost:8080")
+	return router
+
 }
