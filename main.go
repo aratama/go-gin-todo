@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"log"
-	"net/http"
 	"os"
 
 	"aratama.github.com/go-gin-todo/todo"
@@ -13,10 +12,6 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	useSqlite := true
 
@@ -26,14 +21,14 @@ func main() {
 		router := todo.InitizeServer("sqlite3", "todo.sqlite?_pragma=foreign_keys(1)")
 		router.Run("localhost:8080")
 	} else {
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
+
 		// NOte: need parseTime=true option in dataSouce
 		router := todo.InitizeServer("mysql", os.Getenv("DSN"))
 		router.Run("localhost:8080")
 	}
 
-}
-
-func ServeForCloudFunctions(w http.ResponseWriter, r *http.Request) {
-	router := todo.InitizeServer("sqlite3", "todo.sqlite?_pragma=foreign_keys(1)")
-	router.ServeHTTP(w, r)
 }
